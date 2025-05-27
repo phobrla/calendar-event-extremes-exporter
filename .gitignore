@@ -1,0 +1,14 @@
+# macOS system files
+.DS_Store
+
+# Script Editor temp files
+*.scptd
+*.scpt
+
+# CSV output files (optional: ignore generated CSVs)
+calendar_event_extremes_*.csv
+
+# VSCode and other editor settings
+.vscode/
+.idea/
+*.swp
