@@ -9,11 +9,11 @@ set homeDir to (POSIX path of (path to home folder))
 -- Helper: Get current date and time for the filename (yyyyMMdd_HHmmss)
 set currentDate to current date
 set y to year of currentDate as string
-set m to text -2 thru -1 of ("0" & (month of currentDate as integer))
-set d to text -2 thru -1 of ("0" & day of currentDate as integer)
-set h to text -2 thru -1 of ("0" & hours of currentDate as string)
-set min to text -2 thru -1 of ("0" & minutes of currentDate as string)
-set s to text -2 thru -1 of ("0" & seconds of currentDate as string)
+set m to text -2 thru -1 of ("0" & ((month of currentDate as integer) as string))
+set d to text -2 thru -1 of ("0" & ((day of currentDate as integer) as string))
+set h to text -2 thru -1 of ("0" & ((hours of currentDate as integer) as string))
+set min to text -2 thru -1 of ("0" & ((minutes of currentDate as integer) as string))
+set s to text -2 thru -1 of ("0" & ((seconds of currentDate as integer) as string))
 set timestamp to y & m & d & "_" & h & min & s
 
 -- Construct output file path in the user's Documents folder
@@ -74,11 +74,11 @@ end try
 on toISO8601Date(d)
 	if d is "" then return ""
 	set y to year of d as integer
-	set m to text -2 thru -1 of ("0" & (month of d as integer))
-	set da to text -2 thru -1 of ("0" & day of d as integer)
-	set h to text -2 thru -1 of ("0" & (hours of d as integer))
-	set mi to text -2 thru -1 of ("0" & (minutes of d as integer))
-	set s to text -2 thru -1 of ("0" & (seconds of d as integer))
+	set m to text -2 thru -1 of ("0" & ((month of d as integer) as string))
+	set da to text -2 thru -1 of ("0" & ((day of d as integer) as string))
+	set h to text -2 thru -1 of ("0" & ((hours of d as integer) as string))
+	set mi to text -2 thru -1 of ("0" & ((minutes of d as integer) as string))
+	set s to text -2 thru -1 of ("0" & ((seconds of d as integer) as string))
 	return y & "-" & m & "-" & da & "T" & h & ":" & mi & ":" & s
 end toISO8601Date
 
