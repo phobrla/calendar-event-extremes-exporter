@@ -1,7 +1,7 @@
 -- AppleScript: Export Calendar Event Extremes to Timestamped CSV
 -- Author: Copilot, customized for general use
 -- Description: This script exports the earliest and latest events in each Apple Calendar to a timestamped CSV file in the user's Documents folder.
--- Output columns: Email For Account, Calendar Name, Earliest Timestamp, Earliest Name, Latest Timestamp, Latest Name
+-- Output columns: Calendar (Email — Name), Earliest Timestamp, Earliest Name, Latest Timestamp, Latest Name
 
 -- Helper: Get current user's home directory
 set homeDir to (POSIX path of (path to home folder))
@@ -20,7 +20,7 @@ set timestamp to y & m & d & "_" & h & min & s
 set filePath to homeDir & "Documents/calendar_event_extremes_" & timestamp & ".csv"
 
 -- Prepare CSV headers
-set csvText to "Email For Account,Calendar Name,Earliest Timestamp,Earliest Name,Latest Timestamp,Latest Name" & linefeed
+set csvText to "Calendar,Earliest Timestamp,Earliest Name,Latest Timestamp,Latest Name" & linefeed
 
 -- Main logic: Gather calendar event extremes
 tell application "Calendar"
@@ -35,10 +35,17 @@ tell application "Calendar"
 		on error
 			set acct to ""
 		end try
+
+		-- Compose calendar field: email — calendar name (em dash)
+		if acct is not "" then
+			set calendarField to acct & " — " & calName
+		else
+			set calendarField to "— " & calName
+		end if
 		
 		set calEvents to every event of cal
 		if (count of calEvents) is 0 then
-			set csvText to csvText & my csvRow(acct, calName, "", "", "", "") & linefeed
+			set csvText to csvText & my csvRow(calendarField, "", "", "", "") & linefeed
 		else
 			set earliestEvent to item 1 of calEvents
 			set latestEvent to item 1 of calEvents
@@ -57,7 +64,7 @@ tell application "Calendar"
 			-- Format dates as ISO 8601
 			set isoEarly to my toISO8601Date(earlyDate)
 			set isoLate to my toISO8601Date(lateDate)
-			set csvText to csvText & my csvRow(acct, calName, isoEarly, earlyName, isoLate, lateName) & linefeed
+			set csvText to csvText & my csvRow(calendarField, isoEarly, earlyName, isoLate, lateName) & linefeed
 		end if
 	end repeat
 end tell
@@ -94,6 +101,6 @@ on escapeQuotes(t)
 end escapeQuotes
 
 -- Helper: Generate a single CSV row from fields
-on csvRow(email, calName, eTime, eName, lTime, lName)
-	return "\"" & my escapeQuotes(email) & "\",\"" & my escapeQuotes(calName) & "\",\"" & my escapeQuotes(eTime) & "\",\"" & my escapeQuotes(eName) & "\",\"" & my escapeQuotes(lTime) & "\",\"" & my escapeQuotes(lName) & "\""
+on csvRow(calendarField, eTime, eName, lTime, lName)
+	return "\"" & my escapeQuotes(calendarField) & "\",\"" & my escapeQuotes(eTime) & "\",\"" & my escapeQuotes(eName) & "\",\"" & my escapeQuotes(lTime) & "\",\"" & my escapeQuotes(lName) & "\""
 end csvRow
