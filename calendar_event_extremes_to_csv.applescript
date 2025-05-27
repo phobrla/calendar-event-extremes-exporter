@@ -23,51 +23,58 @@ set filePath to homeDir & "Documents/calendar_event_extremes_" & timestamp & ".c
 set csvText to "Calendar,Earliest Timestamp,Earliest Name,Latest Timestamp,Latest Name" & linefeed
 
 -- Main logic: Gather calendar event extremes
-tell application "Calendar"
-	set allCalendars to calendars
-	
-	repeat with cal in allCalendars
-		set calName to name of cal
-		-- Try to get the account email, fallback to blank if not available
-		try
-			set acct to email of account of cal
-			if acct is missing value then set acct to ""
-		on error
-			set acct to ""
-		end try
+with timeout of 600 seconds
+	tell application "Calendar"
+		set allCalendars to calendars
+		repeat with cal in allCalendars
+			set calName to name of cal
+			-- Try to get the account email, fallback to blank if not available
+			try
+				set acct to email of account of cal
+				if acct is missing value then set acct to ""
+			on error
+				set acct to ""
+			end try
 
-		-- Compose calendar field: email — calendar name (em dash)
-		if acct is not "" then
-			set calendarField to acct & " — " & calName
-		else
-			set calendarField to "— " & calName
-		end if
-		
-		set calEvents to every event of cal
-		if (count of calEvents) is 0 then
-			set csvText to csvText & my csvRow(calendarField, "", "", "", "") & linefeed
-		else
-			set earliestEvent to item 1 of calEvents
-			set latestEvent to item 1 of calEvents
-			repeat with ev in calEvents
-				if start date of ev < start date of earliestEvent then
-					set earliestEvent to ev
-				end if
-				if start date of ev > start date of latestEvent then
-					set latestEvent to ev
-				end if
-			end repeat
-			set earlyDate to start date of earliestEvent
-			set earlyName to summary of earliestEvent as string
-			set lateDate to start date of latestEvent
-			set lateName to summary of latestEvent as string
-			-- Format dates as ISO 8601
-			set isoEarly to my toISO8601Date(earlyDate)
-			set isoLate to my toISO8601Date(lateDate)
-			set csvText to csvText & my csvRow(calendarField, isoEarly, earlyName, isoLate, lateName) & linefeed
-		end if
-	end repeat
-end tell
+			-- Compose calendar field: email — calendar name (em dash)
+			if acct is not "" then
+				set calendarField to acct & " — " & calName
+			else
+				set calendarField to "— " & calName
+			end if
+
+			-- Fetch all events (no date range filter)
+			try
+				set calEvents to every event of cal
+			on error
+				set calEvents to {}
+			end try
+
+			if (count of calEvents) is 0 then
+				set csvText to csvText & my csvRow(calendarField, "", "", "", "") & linefeed
+			else
+				set earliestEvent to item 1 of calEvents
+				set latestEvent to item 1 of calEvents
+				repeat with ev in calEvents
+					if start date of ev < start date of earliestEvent then
+						set earliestEvent to ev
+					end if
+					if start date of ev > start date of latestEvent then
+						set latestEvent to ev
+					end if
+				end repeat
+				set earlyDate to start date of earliestEvent
+				set earlyName to summary of earliestEvent as string
+				set lateDate to start date of latestEvent
+				set lateName to summary of latestEvent as string
+				-- Format dates as ISO 8601
+				set isoEarly to my toISO8601Date(earlyDate)
+				set isoLate to my toISO8601Date(lateDate)
+				set csvText to csvText & my csvRow(calendarField, isoEarly, earlyName, isoLate, lateName) & linefeed
+			end if
+		end repeat
+	end tell
+end timeout
 
 -- Write to file
 try
