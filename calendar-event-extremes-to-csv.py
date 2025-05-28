@@ -28,13 +28,13 @@ exported_at = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 conn = sqlite3.connect(f'file:{db_path}?mode=ro', uri=True)
 cur = conn.cursor()
 
-# Query for all calendars (get ROWID, title, shared_owner_address)
-cur.execute("SELECT ROWID, title, shared_owner_address FROM Calendar")
+# Query for all calendars (get ROWID, title, owner_identity_email)
+cur.execute("SELECT ROWID, title, owner_identity_email FROM Calendar")
 calendars = cur.fetchall()
 
 rows = []
 
-for cal_id, cal_title, cal_owner in calendars:
+for cal_id, cal_title, cal_owner_email in calendars:
     # Query all events for this calendar
     cur.execute('''
         SELECT summary, start_date
@@ -46,7 +46,7 @@ for cal_id, cal_title, cal_owner in calendars:
     
     if not events:
         # No events for this calendar
-        calendar_field = f"{cal_owner or ''} — {cal_title}"
+        calendar_field = f"{cal_owner_email or ''} — {cal_title}"
         rows.append([calendar_field, '', '', '', '', exported_at])
         continue
 
@@ -60,7 +60,7 @@ for cal_id, cal_title, cal_owner in calendars:
     early_summary = earliest[0] or ''
     late_summary = latest[0] or ''
 
-    calendar_field = f"{cal_owner or ''} — {cal_title}"
+    calendar_field = f"{cal_owner_email or ''} — {cal_title}"
 
     rows.append([
         calendar_field,
