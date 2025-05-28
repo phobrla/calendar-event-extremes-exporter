@@ -3,9 +3,8 @@ import csv
 import os
 from datetime import datetime, timedelta
 
-# ---- USER VARIABLE: Set this to your Calendar.sqlitedb file (can be a backup copy) ----
+# ---- USER VARIABLE: Path to your Calendar.sqlitedb file ----
 db_path = '/Users/phobrla/Documents/Calendar.sqlitedb'
-output_csv = os.path.expanduser('~/Documents/calendar_event_extremes.csv')
 
 def apple_core_date_to_datetime(ts):
     """Convert Apple Core Data timestamp (seconds since 2001-01-01) to datetime."""
@@ -22,7 +21,12 @@ def iso(dt):
     return dt.strftime('%Y-%m-%dT%H:%M:%S')
 
 # Generate export timestamp
-exported_at = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+exported_at_dt = datetime.now()
+exported_at = exported_at_dt.strftime('%Y-%m-%dT%H:%M:%S')
+timestamp_for_filename = exported_at_dt.strftime('%Y%m%d_%H%M%S')
+
+# CSV output path with timestamp in filename
+output_csv = os.path.expanduser(f'~/Documents/calendar_event_extremes_{timestamp_for_filename}.csv')
 
 # Connect to the database (read-only mode)
 conn = sqlite3.connect(f'file:{db_path}?mode=ro', uri=True)
